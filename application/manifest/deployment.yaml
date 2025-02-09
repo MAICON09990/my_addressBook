@@ -1,0 +1,87 @@
+# Complete Manifest Where in single yml we defined Deployment & Service for SpringApp & PVC(with default  StorageClass),ReplicaSet & Service For Mongo.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: dev
+  name: addressbook
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: addressbook
+  template:
+    metadata:
+      name: addressbook
+      labels:
+        app: addressbook
+    spec:
+      containers:
+        - name: addressbook-container
+          image: 590184090293.dkr.ecr.us-east-2.amazonaws.com/addressbook:1.0.0
+          ports:
+            - containerPort: 8080
+              # env:
+
+# - name: MONGO_DB_USERNAME
+#   value: devdb
+# - name: MONGO_DB_PASSWORD
+#   value: devdb@123
+# - name: MONGO_DB_HOSTNAME
+#   value: mongo
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongodb-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: gp2
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: mongodb
+  labels:
+    app: mongodb
+spec:
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+        - name: mongodb
+          image: mongo:latest
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              value: devdb
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              value: devdb@123
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongodb-data
+              mountPath: /data/db
+      volumes:
+        - name: mongodb-data
+          persistentVolumeClaim:
+            claimName: mongodb-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo
+spec:
+  type: ClusterIP
+  selector:
+    app: mongodb
+  ports:
+    - port: 27017
+      targetPort: 27017

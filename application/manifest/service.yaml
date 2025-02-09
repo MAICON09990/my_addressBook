@@ -1,0 +1,13 @@
+# Manifest file for defining a Kubernetes Service to expose the address book application
+apiVersion: v1
+kind: Service
+metadata:
+  name: addressbook-service
+  namespace: dev
+spec:
+  selector:
+    app: addressbook
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
