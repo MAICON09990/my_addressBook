@@ -29,7 +29,8 @@ tools {
            -Dsonar.projectName='ust address book' \
            -Dsonar.host.url=http://18.217.216.15:9000/ \
            -Dsonar.token=$SONAR_TOKEN \
-           -Dsonar.sources=src \
+           -Dsonar.sources=src/main/java/ \
+ \
            -Dsonar.java.binaries=target/classes"
           }
          }
